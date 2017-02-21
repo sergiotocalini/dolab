@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}DOLab - Reports{% endblock %}
+
+{% block body %}
+<div id="reports">
+  <h1 class="title">Reports</h1>
+  <div class="graphs container">
+    <div class="row">
+      <div class="col-md-3">
+	<div id="graph-cloud-ipt" class="loading"></div>
+      </div>
+      <div class="col-md-6">
+	<div id="graph-cloud-payments" class="loading"></div>
+      </div>
+      <div class="col-md-3">
+	<div id="graph-cloud-it" class="loading"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-3">
+	<div id="graph-master-types" class="loading"></div>
+      </div>
+      <div class="col-md-3">
+	<div id="graph-os" class="loading"></div>
+      </div>
+      <div class="col-md-3">
+	<div id="graph-hw-types"></div>
+      </div>
+      <div class="col-md-3">
+	<div id="graph-masters" class="loading"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="//cdn.corpam.com.ar/d3/stable/d3.min.js"></script>
+<script src="//cdn.corpam.com.ar/c3/stable/c3.min.js"></script>
+<link href="//cdn.corpam.com.ar/c3/stable/c3.min.css" rel="stylesheet" type="text/css">
+<script>
+    $(document).ready(function () {
+	var url_master_type = "{{ url_for('api_stats_infra', mod='masters') }}?group_by=type";
+	var url_os = "{{ url_for('api_stats_infra', mod='minions') }}?group_by=os";
+	var url_type = "{{ url_for('api_stats_infra', mod='minions') }}?group_by=type";
+	var url_masters = "{{ url_for('api_stats_infra', mod='minions') }}?group_by=master";
+	var url_cloud_payments = "{{ url_for('api_stats_cloud', mod='payments') }}?group_by=type";
+	var url_cloud_it = "{{ url_for('api_stats_cloud', mod='instances') }}?group_by=type"
+	var url_cloud_ipt = "{{ url_for('api_stats_cloud', mod='instances') }}?group_by=provider_type"
+	d3.json(url_cloud_payments, function(e) {  
+	    var modHead = ['x']
+	    var modList = {};
+	    e.data.forEach(function(d) {
+		modHead.push(d[0])
+		for (var i in d[1]){
+		    var value = d[1][i];
+		    if (!(i in modList)) {
+			modList[i] = [i];
+		    }
+		    modList[i].push(value);
+		}
+	    });
+	    var columns = [modHead];
+	    for (var key in modList){
+		columns.push(modList[key]);
+	    };
+	    var chart = c3.generate({
+		bindto: '#graph-cloud-payments',
+		data: {
+		    x: 'x',
+		    columns: columns
+		},
+		grid: {
+		    x: {
+			show: true
+		    },
+		    y: {
+			show: true
+		    }
+		},
+		axis: {
+		    x: {
+			type: 'timeseries',
+			tick: { format: '%b %Y' }
+		    }
+		},
+		legend: {
+		    position: 'bottom',
+		},
+	    });	    
+	});	
+	d3.json(url_cloud_it, function(e) {
+	    var modData = [];
+	    e.data.forEach(function(d, i) {
+		modData.push([d.name, d.value]);
+	    });
+	    var chart = c3.generate({
+		bindto: '#graph-cloud-it',
+		data: {
+		    columns: modData,
+		    type : 'donut',
+		},
+		legend: {
+		    position: 'bottom',
+		},
+		donut: {
+		    title: 'Instances Type',
+		}	    
+	    });
+	});
+	d3.json(url_cloud_ipt, function(e) {
+	    var modData = [];
+	    e.data.forEach(function(d, i) {
+		modData.push([d.name, d.value]);
+	    });
+	    var chart = c3.generate({
+		bindto: '#graph-cloud-ipt',
+		data: {
+		    columns: modData,
+		    type : 'donut',
+		},
+		legend: {
+		    position: 'bottom',
+		},
+		donut: {
+		    title: 'Providers',
+		}	    
+	    });
+	});
+	d3.json(url_master_type, function(e) {
+	    var modData = [];
+	    e.data.forEach(function(d, i) {
+		modData.push([d.name, d.value]);
+	    });
+	    var chart = c3.generate({
+		bindto: '#graph-master-types',
+		data: {
+		    columns: modData,
+		    type : 'donut',
+		},
+		legend: {
+		    position: 'bottom',
+		},
+		donut: {
+		    title: 'CM',
+		}	    
+	    });
+	});
+	d3.json(url_os, function(e) {
+	    var modData = [];
+	    e.data.forEach(function(d, i) {
+		modData.push([d.name, d.value]);
+	    });
+	    var chart = c3.generate({
+		bindto: '#graph-os',
+		data: {
+		    columns: modData,
+		    type : 'donut',
+		},
+		legend: {
+		    position: 'bottom',
+		},
+		donut: {
+		    title: 'OS',
+		}	    
+	    });
+	});
+	d3.json(url_type, function(e) {
+	    var modData = [];
+	    e.data.forEach(function(d, i) {
+		modData.push([d.name, d.value]);
+	    });
+	    var chart = c3.generate({
+		bindto: '#graph-hw-types',
+		data: {
+		    columns: modData,
+		    type : 'donut',
+		},
+		legend: {
+		    position: 'bottom',
+		},
+		donut: {
+		    title: 'Types',
+		}	    
+	    });
+	});
+	d3.json(url_masters, function(e) {
+	    var modData = [];
+	    e.data.forEach(function(d, i) {
+		modData.push([d.name, d.value]);
+	    });
+	    var chart = c3.generate({
+		bindto: '#graph-masters',
+		data: {
+		    columns: modData,
+		    type : 'donut',
+		},
+		legend: {
+		    position: 'bottom',
+		},
+		donut: {
+		    title: 'Masters',
+		}	    
+	    });
+	});
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "admin.html" %}
+
+{% block title %}DOLab - Administration{% endblock %}
+
+{% block content %}
+<ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+  <li class="active">
+    <a data-toggle="tab" href="#variables">
+      <i class="fa fa-fw fa-code"></i>
+      Variables
+    </a>
+  </li>
+</ul>
+<div class="tab-content">
+  <div id="variables" class="tab-pane fade in active">
+    <table id="table-variables" data-show-toggle="false"
+	   data-show-export="false"
+	   data-show-columns="true" data-show-multi-sort="true"
+	   data-sort-name="key" data-pagination="true"
+	   data-toggle="table" data-search="true"
+	   data-toolbar="#toolbar-variables"
+	   data-show-footer="false" data-page-size="50" data-escape="false"
+	   class="table table-hover table-striped table-compact 
+		  table-condensed table-autosize">
+      <thead>
+	<tr>
+	  <th data-sortable="true" data-halign="center"
+	      data-valign="middle" data-field="vid"
+	      data-visible="false">
+	    <i class="fa fa-fw fa-key"></i>		   
+	    ID
+	  </th>
+	  <th data-sortable="true" data-halign="center"
+	      data-valign="middle" data-field="key">
+	    <i class="fa fa-fw fa-key"></i>	  
+	    Key
+	  </th>
+	  <th data-halign="center" data-halign="center"
+	      data-valign="middle" data-field="value">
+	    <i class="fa fa-fw fa-info"></i>
+	    Value
+	  </th>
+      </thead>
+      <tbody>
+	{% for config in data('Config') %}
+	<tr>
+	  <td>{{ config.id }}</td>
+	  <td>{{ config.key }}</td>
+	  <td>{{ config.value }}</td>
+	</tr>
+	{% endfor %}      
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link href="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.css" rel="stylesheet">
+<script src="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.js"></script>
+<script>
+    $(document).ready(function () {
+	autosize_tables();
+	$(window).resize(function () {
+	    autosize_tables();
+	});
+	$('.modal').on('hidden.bs.modal', function(){
+	    $('.modal').find('.modal-title').html('New');
+	    var forms = $(this).find('form');
+	    forms.each(function(row){
+		forms[row].reset();
+	    });
+	    var selectpickers = $(this).find('.selectpicker');
+	    selectpickers.each(function(row){
+		$(selectpickers[row]).selectpicker('refresh');
+	    });
+	});
+	jqlisteners();
+    });
+function rowStyle(row, index) {
+    if ( row['status'] == 'False' ) {
+    	return {
+    	    css: {"text-decoration": "line-through"}
+    	};
+    } else {
+	return {
+	    css: {"text-decoration": "none"}
+	};
+    }
+}
+function autosize_tables() {
+    var tables = $('body').find(".table-autosize");
+    tables.each(function(row){
+	var selector = $(tables[row]).attr('id');
+	selector = '#' + selector;
+	$(selector).on('post-body.bs.table', function () {
+	    jqlisteners();
+	});
+	$(selector).bootstrapTable({
+	    height: table_height(selector),
+	});
+	$(selector).bootstrapTable('resetView', {
+	    height: table_height(selector),
+	});	    
+    });
+}
+function table_height(table) {
+    var parent = $(table).parent().parent().parent().parent();
+    return parent.height();
+};
+</script>
+{% endblock %}

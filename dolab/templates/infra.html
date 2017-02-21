@@ -1,0 +1,818 @@
+{% extends "base.html" %}
+
+{% block title %}DOLab - Infrastructure{% endblock %}
+
+{% block body %}
+<div id="infra">
+  <div class="content">
+    <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+      <li class="active">
+	<a data-toggle="tab" href="#minions">
+	  <i class="fa fa-cubes fa-fw"></i>
+	  Minions
+	</a>
+      </li>
+      <li>
+	<a data-toggle="tab" href="#jobs">
+	  <i class="fa fa-tasks fa-fw"></i>
+	  Jobs
+	</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div id="minions" class="tab-pane fade in active">
+	<table id="table-minions" data-show-toggle="false"
+	       data-show-export="false" data-row-style="rowStyle"
+	       data-show-columns="true" data-show-multi-sort="true"
+	       data-sort-name="master" data-pagination="true"
+	       data-toggle="table" data-search="true"
+	       data-show-footer="false" data-page-size="50"
+	       data-escape="false"
+	       class="table table-hover table-striped table-compact 
+		      table-condensed table-autosize">
+	  <thead>
+	    <tr>
+	      <th data-align="center" data-valign="middle"
+		  data-field="status" data-sortable="true"
+		  data-visible="false" data-checkbox="true">
+		<i class="fa fa-fw fa-question"></i>
+		Status
+	      </th>        
+              <th data-field="name" data-sortable="true"
+		  data-align="left" data-valign="middle">
+		<i class="fa fa-fw fa-sort-amount-desc"></i>
+		Name
+	      </th>
+	      <th data-field="arch" data-sortable="true"
+		  data-align="center" data-valign="middle">
+		<i class="fa fa-fw fa-server"></i>
+		Arch
+	      </th>
+	      <th data-field="mem" data-sortable="false"
+		  data-align="center" data-valign="middle">
+		<i class="fa fa-fw fa-info"></i>
+		Memory
+	      </th>
+	      <th data-field="os" data-sortable="true"
+		  data-valign="middle" data-align="center">
+		<i class="fa fa-fw fa-terminal"></i>
+		OS
+	      </th>
+	      <th data-field="type" data-sortable="true"
+		  data-valign="middle" data-align="center">
+		<i class="fa fa-fw fa-info"></i>
+		Type
+	      </th>
+	      <th data-field="master" data-sortable="true"
+		  data-valign="middle" data-align="center">
+		<i class="fa fa-fw fa-cube"></i>
+		Master
+	      </th>
+	      <th data-field="version" data-sortable="true"
+		  data-visible="false"
+		  data-valign="middle" data-align="center">
+		<i class="fa fa-fw fa-info"></i>
+		Version
+	      </th>
+	      <th data-align="center" data-valign="middle"
+		  data-field="lastseen">
+		<i class="fa fa-fw fa-calendar"></i>
+		Last seen
+	      </th>
+	  </thead>
+	  <tbody>
+	    {% for minion in data('Minion') %}
+	    <tr class="minion-open" data-id="{{ minion.id }}">
+	      <td>{{ minion.status }}</td>
+              <td>{{ minion.name }}</td>
+	      <td>{{ minion.cpu_arch }}</td>
+	      <td>{{ minion.mem_total }} MB</td>
+	      <td>{{ minion.os }} {{ minion.os_release }}</td>
+	      <td>{{ minion.type }}</td>
+	      <td>{{ minion.master.name }}</td>
+	      <td>{{ minion.version }}</td>
+	      <td>{{ ago(minion.last_seen) }}</td>
+	    </tr>
+	    {% endfor %}      
+	  </tbody>
+	</table>
+      </div>
+      <div id="jobs" class="tab-pane fade">
+	<div id="toolbar-jobs">
+	  <button class="btn btn-default" type="button" id="job-new">
+	    <i class="fa fa-fw fa-plus"></i>
+	  </button>
+	</div>
+	<table id="table-jobs" data-show-toggle="false"
+	       data-show-export="false" data-escape="false"
+	       data-show-columns="true" data-show-multi-sort="true"
+	       data-sort-name="start_time" data-sort-order="desc"
+	       data-toggle="table" data-search="true"
+	       data-toolbar="#toolbar-jobs" data-pagination="true"
+	       data-show-footer="false" data-page-size="50"
+	       class="table table-hover table-striped table-compact
+		      table-condensed table-autosize">
+	  <thead>
+	    <tr>
+	      <th data-sortable="true" data-align="center"
+		  data-valign="middle" data-field="id"
+		  data-visible="false">
+		<i class="fa fa-fw fa-key"></i>
+		ID
+	      </th>
+	      <th data-sortable="true" data-align="center"
+		  data-valign="middle" data-field="start_time"
+		  data-visible="true">
+		<i class="fa fa-fw fa-calendar"></i>
+		Start
+	      </th>	      
+	      <th data-sortable="true" data-align="center"
+		  data-valign="middle" data-field="tasks"
+		  data-visible="true">
+		<i class="fa fa-fw fa-tasks"></i>
+		Tasks
+	      </th>
+	      <th data-sortable="true" data-align="left"
+		  data-valign="middle" data-field="user"
+		  data-halign="center" data-visible="true">
+		<i class="fa fa-fw fa-user"></i>
+		Owner
+	      </th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    {% for job in data('Job') %}
+	    <tr class="job-open" data-id="{{ job.id }}">
+	      <td>{{ job.id }}</td>
+	      <td>{{ job.start_time }}</td>
+	      <td>{{ job.tasks.count() }}</td>
+	      <td>
+		<img class="img-circle fa fa-fw" src="{{ job.user.avatar }}"/>
+		<span>{{ job.user.displayname }}</span>
+	      </td>
+	    </tr>
+	    {% endfor %}      
+	  </tbody>
+	</table>
+      </div>      
+    </div>
+  </div>
+</div>
+<div id="ModalJobRun" class="modal fade" tabindex="-1"
+     role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-vcenter">
+    <div class="modal-dialog">
+      <div class="modal-content">
+	<div class="modal-header"
+	     style="background-color: #337ab7; color: #fff; height: 10%;">
+	  <button type="button" class="close"
+		  data-dismiss="modal" aria-hidden="true">
+	    &times;
+	  </button>
+	  <h4 class="modal-title">Job: New</h4>
+	</div>
+	<div class="modal-body">
+	  <form class="form" role="form" method="POST">
+	    <fieldset id="fieldset">
+	      <input class="col-md-8 form-control-static hidden" id="jobid">
+	      <div class="row">
+		<div class="col-md-4 form-group">
+		  <label class="control-label" for="name">
+		    Start
+		  </label>
+		  <input type="text" class="form-control" id="start_time"
+			 placeholder="Now"/>
+		</div>
+		<div class="col-md-4 form-group">
+		  <label class="control-label" for="fun">
+		    Function
+		  </label>
+		  <select class="selectpicker show-tick form-control"
+			  id="function" name="function"
+			  data-live-search="true" title="...">
+		    {% for fun in data('Function') %}
+		    <option value="{{ fun.id }}" data-tokens="{{ fun.fun }}">
+		      {{ fun.fun }}
+		    </option>
+		    {% endfor %}
+		  </select>
+		</div>
+		<div class="col-md-4 form-group">
+		  <label class="control-label" for="args">
+		    Arguments
+		  </label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="args"/>
+		  </div>
+		</div>
+	      </div>
+	    </fieldset>
+	  </form>
+	  <div class="table-content">
+	    <table id="table-jobs-minions" data-show-toggle="false"
+		   data-show-export="false" data-escape="false"
+		   data-show-columns="true" data-show-multi-sort="true"
+		   data-sort-name="name" data-pagination="true"
+		   data-click-to-select="true"
+		   data-toggle="table" data-search="true"
+		   data-show-footer="false" data-page-size="10"
+		   class="table table-hover table-striped table-compact
+			  table-condensed table-autosize">
+	      <thead>
+		<tr>
+		  <th data-sortable="false" data-align="center"
+		      data-valign="middle" data-field="state"
+		      data-visible="true" data-checkbox="true">
+		  </th>
+		  <th data-sortable="true" data-align="center"
+		      data-valign="middle" data-field="id"
+		      data-visible="false">
+		    <i class="fa fa-fw fa-key"></i>
+		    ID
+		  </th>
+		  <th data-sortable="true" data-align="center"
+		      data-valign="middle" data-field="name"
+		      data-visible="true">
+		    <i class="fa fa-fw fa-cube"></i>
+		    Minion
+		  </th>
+		  <th data-sortable="true" data-align="center"
+		      data-valign="middle" data-field="master"
+		    data-visible="true">
+		    <i class="fa fa-fw fa-cubes"></i>
+		    Master
+		  </th>
+		</tr>
+	      </thead>
+	      <tbody>
+		{% for minion in data('Minion') %}
+		<tr>
+		  <td></td>
+		  <td>{{ minion.id }}</td>
+		  <td>{{ minion.name }}</td>
+		  <td>{{ minion.master.name }}</td>
+		</tr>
+		{% endfor %}      
+	      </tbody>
+	    </table>
+	  </div>
+	</div>
+	<div class="modal-footer">
+	  <div class="pull-right">
+	    <button type="button" class="btn btn-default"
+		    data-dismiss="modal">
+	      Close
+	    </button>
+	    <button type="button" class="btn btn-primary" id="job-run">
+	      Run
+	    </button>
+	  </div>
+	</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="ModalMinion" class="modal fade" tabindex="-1"
+     role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-vcenter">
+    <div class="modal-dialog">
+      <div class="modal-content">
+	<div class="modal-header"
+	     style="background-color: #337ab7; color: #fff;">
+	  <button type="button" class="close"
+		  data-dismiss="modal" aria-hidden="true">
+	    &times;
+	  </button>
+	  <h4 class="modal-title">New</h4>
+	</div>
+	<div class="modal-body">
+	  <form class="form" role="form" method="POST">
+	    <fieldset id="fieldset">
+	      <input class="col-md-8 form-control-static hidden" id="mid">
+	      <div class="row">
+		<div class="col-md-6 form-group">
+		  <label class="control-label" for="name">
+		    Name
+		  </label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="name" readonly/>
+		  </div>
+		</div>
+		<div class="col-md-6 form-group">
+		  <label class="control-label" for="master">
+		    Master
+		  </label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="master" readonly/>
+		  </div>
+		</div>
+	      </div>
+	      <div class="row">
+		<div class="col-md-6 form-group">
+		  <label class="control-label" for="type">
+		    Type
+		  </label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="type" readonly/>
+		  </div>
+		</div>
+		<div class="col-md-6 form-group">
+		  <label class="control-label" for="family">
+		    Family
+		  </label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="family" readonly/>
+		  </div>
+		</div>
+	      </div>
+	      <div class="row">
+		<div class="col-md-6 form-group">
+		  <label class="control-label" for="os">
+		    Operative System
+		  </label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="os" readonly/>
+		  </div>
+		</div>
+		<div class="col-md-6 form-group">
+		  <label class="control-label" for="arch">
+		    Arch
+		  </label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="arch" readonly/>
+		  </div>
+		</div>
+	      </div>
+	      <div class="row">
+    		<div class="col-md-6 form-group">
+		  <label class="control-label" for="mem">
+		    Memory
+		  </label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="mem" readonly/>
+		  </div>
+		</div>
+		<div class="col-md-6 form-group">
+		  <label class="control-label" for="cpu">
+		    CPU
+		  </label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="cpu" readonly/>
+		  </div>
+		</div>
+	      </div>
+	      <div class="row">
+		<div class="col-md-6 form-group">
+		  <label class="control-label" for="kernel">
+		    Kernel
+		  </label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="kernel" readonly/>
+		  </div>
+		</div>
+		<div class="col-md-6 form-group">
+		  <label class="control-label" for="product">
+		    Product
+		  </label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="product" readonly/>
+		  </div>
+		</div>
+	      </div>
+	      <div class="row">
+		<div class="col-md-6 form-group">
+		  <label class="control-label" for="serial">
+		    Serial
+		  </label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="serial" readonly/>
+		  </div>
+		</div>
+	      </div>
+	    </fieldset>
+	  </form>
+	</div>
+	<div class="modal-footer">
+	  <div class="pull-left">
+	    <a class="minion-delete"
+	       style="outline: none;text-decoration: none;cursor: pointer;">
+	      <i class="fa fa-fw fa-2x fa-trash" aria-hidden="true"></i>
+	    </a>
+	    <a class="minion-lock"
+	       style="outline: none;text-decoration: none;cursor: pointer;">
+	      <i class="fa fa-fw fa-2x" aria-hidden="true"></i>
+	    </a>
+	    <a class="minion-refresh"
+	       style="outline: none;text-decoration: none;cursor: pointer;">
+	      <i class="fa fa-fw fa-2x fa-refresh" aria-hidden="true"></i>
+	    </a>
+	    <a class="minion-inventory" target="_blank"
+	       style="outline: none;text-decoration: none;cursor: pointer;">
+	      <i class="fa fa-fw fa-2x fa-search" aria-hidden="true"></i>
+	    </a>        
+	  </div>
+	  <div class="pull-right">
+	    <button type="button" class="btn btn-default"
+		    data-dismiss="modal">
+	      Close
+	    </button>
+	  </div>
+	</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="ModalJobShow" class="modal fade" tabindex="-1"
+     role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-content"
+       style="width: 50%;height: 80%;position: absolute;
+	      top: 50%;left: 50%;
+	      transform: translateY(-50%) translateX(-50%);">
+    <div class="modal-header"
+	 style="background-color: #337ab7; color: #fff;">
+      <button type="button" class="close"
+	      data-dismiss="modal" aria-hidden="true">
+	&times;
+      </button>
+      <h4 class="modal-title">Job: New</h4>
+    </div>
+    <div class="modal-body">
+      <form class="form" role="form" method="POST">
+	<fieldset id="fieldset">
+	  <div class="row">
+	    <div class="col-md-4 form-group">
+	      <label class="control-label" for="name">
+		Start
+	      </label>
+	      <div class="input-group">
+		<input type="text" class="form-control"
+		       id="start_time" readonly/>
+	      </div>
+	    </div>
+	    <div class="col-md-4 form-group">
+	      <label class="control-label" for="fun">
+		Function
+	      </label>
+	      <div class="input-group">
+		<input type="text" class="form-control"
+		       id="fun" readonly/>
+	      </div>
+	    </div>
+	    <div class="col-md-4 form-group">
+	      <label class="control-label" for="arg">
+		Argument
+	      </label>
+	      <div class="input-group">
+		<input type="text" class="form-control"
+		       id="arg" readonly/>
+	      </div>
+	    </div>
+	  </div>
+	</fieldset>
+      </form>
+      <div class="table-content">
+	<table id="table-jobs-tasks" data-show-toggle="false"
+	       data-show-export="false" data-escape="false"
+	       data-show-columns="true" data-show-multi-sort="true"
+	       data-sort-name="master" data-pagination="true"
+	       data-detail-view="true" data-detail-formatter="detailFormatter"
+	       data-toggle="table" data-search="true"
+	       data-show-footer="false" data-page-size="10"
+	       class="table table-hover table-striped table-compact
+		      table-condensed table-autosize">
+	  <thead>
+	    <tr>
+	      <th data-sortable="true" data-align="center"
+		  data-valign="middle" data-field="id"
+		  data-visible="false">
+		<i class="fa fa-fw fa-key"></i>
+		ID
+	      </th>
+	      <th data-sortable="true" data-align="center"
+		  data-valign="middle" data-field="minion"
+		  data-visible="true">
+		<i class="fa fa-fw fa-cube"></i>
+		Minion
+	      </th>
+	      <th data-sortable="true" data-align="center"
+		  data-valign="middle" data-field="master"
+		  data-visible="true">
+		<i class="fa fa-fw fa-cubes"></i>
+		Master
+	      </th>
+	    </tr>
+	  </thead>
+	  <tbody></tbody>
+	</table>	    
+      </div>
+    </div>
+    <div class="modal-footer"
+	 style="position: absolute;bottom: 0px;width: 100%;">
+      <div class="pull-right">
+	<button type="button" class="btn btn-default"
+		data-dismiss="modal">
+	  Close
+	</button>
+	<button type="button" class="btn btn-primary" id="job-run">
+	  Run
+	</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link href="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.css" rel="stylesheet">
+<script src="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.js"></script>
+<link href="//cdn.corpam.com.ar/bootstrap-select/stable/css/bootstrap-select.min.css" rel="stylesheet">
+<script src="//cdn.corpam.com.ar/bootstrap-select/stable/js/bootstrap-select.min.js"></script>
+<script src="//cdn.corpam.com.ar/moment/stable/js/moment.min.js"></script>    
+<link href="//cdn.corpam.com.ar/bootstrap-datetimepicker/stable/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<script src="//cdn.corpam.com.ar/bootstrap-datetimepicker/stable/js/bootstrap-datetimepicker.min.js"></script>
+<script>
+    $(document).ready(function () {
+	autosize_tables();
+	$(window).resize(function () {
+	    autosize_tables();
+	});
+	$('.modal').on('hidden.bs.modal', function(){
+	    $('.modal').find('.modal-title').html('New');
+	    var forms = $(this).find('form');
+	    forms.each(function(row){
+		forms[row].reset();
+	    });
+	    var selectpickers = $(this).find('.selectpicker');
+	    selectpickers.each(function(row){
+		$(selectpickers[row]).selectpicker('refresh');
+	    });
+	});
+	$("#start_time").datetimepicker({
+	    showTodayButton: true,
+	    showClose: true,
+	    format: 'YYYY/MM/DD HH:mm:ss',
+	});
+	jqlisteners();
+    });
+function jqlisteners() {
+    $(".minion-open").click(function(e){
+	e.preventDefault();
+	var modal = '#ModalMinion';
+	var mid = $(this).data('id');
+	var url = "{{ url_for('api_minions') }}?id=" + mid;
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: 'GET',
+	    success: function(e) {
+		var data = e['data'][0];
+		var tag = $(modal).find('.minion-lock').find('i');
+		var link = $(modal).find('.minion-inventory')
+		if ( data['type'] === 'physical' ) {
+		    var url = 'https://manage.corpam.com.ar/iman/items/';
+		    url += data['serial'];
+		    if ( link.hasClass('disabled') ) {
+			link.toggleClass('disabled');
+		    };	
+		    link.attr('href', url);
+		} else {
+		    if ( ! link.hasClass('disabled') ) {
+			link.toggleClass('disabled');
+		    };	
+		    link.attr('href', '');
+		}
+		if ( data['status'] == true ) {
+		    tag.addClass('fa-unlock');
+		} else {
+		    tag.addClass('fa-lock');
+		};
+		$(modal).find('.modal-title').html(data['name']);
+		$(modal).find('#mid').val(data['id']);
+		$(modal).find('#name').val(data['name']);
+		$(modal).find('#master').val(data['master']);
+		$(modal).find('#type').val(data['type']);
+		$(modal).find('#os').val(data['os']+' '+data['os_release']);
+		$(modal).find('#mem').val(data['mem_total']+' MB');
+		$(modal).find('#arch').val(data['cpu_arch']);
+		$(modal).find('#cpu').val(data['cpu_model']);
+		$(modal).find('#family').val(data['os_family']);
+		$(modal).find('#kernel').val(data['kernel_release']);
+		$(modal).find('#product').val(data['product']);
+		$(modal).find('#serial').val(data['serial']);
+		$(modal).modal('show');
+	    }
+	}); 
+    });
+    $(".minion-lock").click(function(e) {
+	e.preventDefault();
+	var modal = '#ModalMinion';
+	var mid = $(modal).find('#mid').val();
+	var url = "{{ url_for('api_minions') }}?id=" + mid;
+	var tag = $(modal).find('.minion-lock').find('i');
+	if ( tag.hasClass('fa-unlock') ) {
+	    var active = false;
+	    tag.removeClass('fa-unlock');
+	    tag.addClass('fa-spinner fa-pulse')
+	} else if (tag.hasClass('fa-lock') ) {
+	    var active = true;
+	    tag.removeClass('fa-lock');
+	    tag.addClass('fa-spinner fa-pulse');
+	} else {
+	    return;
+	};
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: 'POST',
+	    data: JSON.stringify({'status': active}),
+	    contentType: "application/json",
+	    success: function(e) {
+		tag.removeClass('fa-spinner fa-pulse');
+		if ( active == true ) {
+		    tag.addClass('fa-unlock');
+		} else {
+		    tag.addClass('fa-lock');
+		}
+	    },
+	    error: function(e) {
+		tag.removeClass('fa-spinner fa-pulse');
+		tag.addClass('fa-exclamation');
+	    }
+	}); 	
+    });
+    $(".minion-delete").click(function(e) {
+	e.preventDefault();
+	var modal = '#ModalMinion';
+	var mid = $(modal).find('#mid').val();
+	var url = "{{ url_for('api_minions') }}?id=" + mid;
+	var tag = $(modal).find('.minion-delete').find('i');
+	tag.removeClass('fa-trash');
+	tag.addClass('fa-spinner fa-pulse')	
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: 'DELETE',
+	    success: function(e) {
+		var deleteable = {'field': 'mid', 'values': [mid] };
+		$('#table-minions').bootstrapTable('remove', deleteable);
+		$(modal).modal('hide');
+	    },
+	    error: function(e) {
+		tag.removeClass('fa-spinner fa-pulse');
+		tag.addClass('fa-exclamation');
+	    }
+	}); 	
+    });
+    $(".minion-refresh").click(function(e) {
+	e.preventDefault();
+	var modal = '#ModalMinion';
+	var mid = $(modal).find('#mid').val();
+	var url = "{{ url_for('api_minions') }}?id=" + mid;
+	var tag = $(modal).find('.minion-refresh').find('i');
+	if ( ! tag.hasClass('fa-refresh') ) {
+	    return;
+	};
+	tag.removeClass('fa-refresh');
+	tag.addClass('fa-spinner fa-pulse')
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: 'PUT',
+	    success: function(e) {
+		tag.removeClass('fa-spinner fa-pulse');
+		tag.addClass('fa-refresh');
+		$(modal).modal('hide');
+	    },
+	    error: function(e) {
+		tag.removeClass('fa-spinner fa-pulse');
+		tag.addClass('fa-exclamation');
+	    }
+	});	
+    });
+    $('.job-open').unbind("click");
+    $('.job-open').click(function(e) {
+	e.preventDefault();
+	var modal = '#ModalJobShow';
+	var job = $(this).data('id');
+	var table = '#table-jobs-tasks';
+	$(table).bootstrapTable('removeAll');
+	$(table).bootstrapTable('showLoading');
+	$(modal).modal('show');
+	$.ajax({
+	    async: false,
+	    url: "{{ url_for('api_jobs') }}?id=" + job,
+	    type: 'GET',
+	    success: function(e) {
+		var data = e['data'][0];
+		$(modal).find('#start_time').val(data['start_time']);
+		$(modal).find('#fun').val(data['fun']);
+		$(modal).find('#arg').val(data['args']);
+		$(table).bootstrapTable('hideLoading');
+		var tasks = data['tasks'];
+		for(i in tasks) {
+		    $(table).bootstrapTable('append', {
+			'id': tasks[i]['id'],
+			'minion': tasks[i]['minion']['name'],
+			'master': tasks[i]['minion']['master']['name']
+		    });
+		}
+	    }
+	});
+    });
+    $('#job-new').click(function(e) {
+	e.preventDefault();
+	var modal = '#ModalJobRun';
+	$(modal).modal('show');
+    });
+    $('#job-run').unbind("click");
+    $('#job-run').click(function(e) {
+	e.preventDefault();
+	var url = "{{ url_for('api_jobs') }}";
+	var modal = '#ModalJobRun';
+	var table =  '#table-jobs-minions';
+	var minions = [];
+	var selection = $(table).bootstrapTable('getAllSelections');
+	$(selection).each(function(row){
+	    minions.push(selection[row]['id']);
+	});
+	var data = {
+	    'fun': $(modal).find('#fun').val(),
+	    'args': $(modal).find('#args').val().split(','),
+	    'minions': minions,
+	};
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: 'POST',
+	    data: JSON.stringify(data),
+	    contentType: "application/json",
+	    success: function(e) {
+		$(table).bootstrapTable('uncheckAll');
+		$(modal).modal('hide');		
+	    }
+	});
+    });
+}
+function autosize_tables() {
+    var tables = $('body').find(".table-autosize");
+    tables.each(function(row){
+	var selector = $(tables[row]).attr('id');
+	selector = '#' + selector;
+	$(selector).on('post-body.bs.table', function () {
+	    jqlisteners();
+	});
+	$(selector).bootstrapTable({
+	    height: table_height(selector),
+	});
+	$(selector).bootstrapTable('resetView', {
+	    height: table_height(selector),
+	});	    
+    });
+}
+function table_height(table) {
+    var parent = $(table).parent().parent().parent().parent();
+    return parent.height();
+};
+function detailFormatter(index, row) {
+    console.log(index, row);
+    var html = '';
+    $.ajax({
+	async: false,
+	url: "{{ url_for('api_tasks') }}?id=" + row['id'],
+	type: 'GET',
+	success: function(e) {
+	    var data = e['data'][0];
+	    var result = data['return']['result'][row['minion']];
+	    html+="<pre>";
+	    html+="~ $ salt '" + row['minion'] + "' " + data['fun'] + " ";
+	    html+=data['args'].join(' ') + "\n"
+	    html+=row['minion'] + "\n";
+	    if( typeof (result['out']) === 'undefined' ) {
+		html+="    ----------\n";
+		for(cmd in result['return']) {
+		    html+="    " + cmd + ":\n";
+		    html+="        " + result['return'][cmd] + "\n"
+		};
+	    } else {
+		html+="    " + result['return'][data['args'][0]] + "\n";
+	    };
+	    html+="~ $"
+	    html+="</pre>";
+	}
+    });
+    return html;
+}
+</script>
+{% endblock %}

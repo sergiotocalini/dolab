@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}DOLab - Cloud Computing{% endblock %}
+
+{% block body %}
+<div id="cloud">
+  <div class="content">
+    <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+      <li class="active">
+	<a data-toggle="tab" href="#instances">
+	  <i class="fa fa-fw fa-cloud"></i>
+	  Instances
+	</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div id="instances" class="tab-pane fade in active">
+	<table id="table-instances" data-show-toggle="false"
+	       data-show-export="false" data-row-style="rowStyle"
+	       data-show-columns="true" data-show-multi-sort="true"
+	       data-sort-name="name" data-pagination="true"
+	       data-toggle="table" data-search="true"
+	       data-show-footer="false" data-page-size="50"
+	       data-escape="false"
+	       class="table table-hover table-striped table-compact 
+		      table-condensed table-autosize">
+	  <thead>
+	    <tr>
+	      <th data-align="center" data-valign="middle"
+		  data-sortable="true"
+		  data-field="instance" data-rowspan="2">
+		<i class="fa fa-fw fa-key"></i>
+		Instance ID
+	      </th>
+	      <th data-align="center" data-valign="middle"
+		  data-field="provider" data-rowspan="2">
+		<i class="fa fa-fw fa-user-secret"></i>
+		Provider
+	      </th>
+	      <th data-align="center" data-valign="middle" data-field="name"
+		  data-sortable="true" data-rowspan="2">
+		<i class="fa fa-fw fa-sort-amount-desc"></i>	    
+		Name
+	      </th>
+	      <th data-align="center" data-valign="middle" data-field="state"
+		  data-sortable="true" data-visible="true" data-rowspan="2">
+		<i class="fa fa-fw fa-question"></i>
+		State
+	      </th>    
+	      <th data-align="center" data-valign="middle"
+		  data-sortable="true"
+		  data-field="type" data-rowspan="2">
+		<i class="fa fa-fw fa-info"></i>
+		Type
+	      </th>
+	      <th data-align="center" data-valign="middle" data-field="region"
+		  data-sortable="true" data-rowspan="2">
+		<i class="fa fa-fw fa-map-marker"></i>
+		Region
+	      </th>
+	      <th data-align="center" data-valign="middle" data-colspan="2">
+		<i class="fa fa-fw fa-globe"></i>
+		IP
+	      </th>
+	      <th data-align="center" data-valign="middle" data-field="hv"
+		  data-rowspan="2">
+		<i class="fa fa-fw fa-info"></i>
+		Hypervisor
+	      </th>
+	    </tr>
+	    <tr>
+	      <th data-align="center" data-valign="middle" data-field="private">
+		Private
+	      </th>
+	      <th data-align="center" data-valign="middle" data-field="public">
+		Public
+	      </th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    {% for instance in data('Instance') %}
+	    <tr class="instance-open" data-id="{{ instance.id }}">
+	      <td>
+		{% if instance.provider.type == 'Amazon EC2' %}
+		<i class="fa fa-fw fa-amazon"></i>
+		{% elif instance.provider.type == 'Microsoft Azure' %}
+		<i class="fa fa-fw fa-windows"></i>
+		{% endif %}
+		{{ instance.instance }}
+	      </td>
+	      <td>{{ instance.provider.name }}</td>
+	      <td>{{ instance.name }}</td>
+	      <td>{{ instance.state }}</td>
+	      <td>{{ instance.type }}</td>
+	      <td>{{ instance.region }}</td>
+	      <td>{{ instance.address_private }}</td>
+	      <td>{{ instance.address_public }}</td>
+	      <td>
+		{{ instance.hypervisor }} ( {{ instance.hypervisor_type }} )
+	      </td>
+	    </tr>
+	    {% endfor %}      
+	  </tbody>
+	</table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link href="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.css" rel="stylesheet">
+<script src="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.js"></script>
+<link href="//cdn.corpam.com.ar/bootstrap-select/stable/css/bootstrap-select.min.css" rel="stylesheet">
+<script src="//cdn.corpam.com.ar/bootstrap-select/stable/js/bootstrap-select.min.js"></script>
+<script src="//cdn.corpam.com.ar/moment/stable/js/moment.min.js"></script>    
+<link href="//cdn.corpam.com.ar/bootstrap-datetimepicker/stable/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<script src="//cdn.corpam.com.ar/bootstrap-datetimepicker/stable/js/bootstrap-datetimepicker.min.js"></script>
+<script>
+    $(document).ready(function () {
+	autosize_tables();
+	$(window).resize(function () {
+	    autosize_tables();
+	});
+	$('.modal').on('hidden.bs.modal', function(){
+	    $('.modal').find('.modal-title').html('New');
+	    var forms = $(this).find('form');
+	    forms.each(function(row){
+		forms[row].reset();
+	    });
+	    var selectpickers = $(this).find('.selectpicker');
+	    selectpickers.each(function(row){
+		$(selectpickers[row]).selectpicker('refresh');
+	    });
+	});
+	$("#start_time").datetimepicker({
+	    showTodayButton: true,
+	    showClose: true,
+	    format: 'YYYY/MM/DD HH:mm:ss',
+	});
+	jqlisteners();
+    });
+function jqlisteners() {
+    $('.job-open').unbind("click");
+    $('.job-open').click(function(e) {
+	e.preventDefault();
+	var modal = '#ModalJobShow';
+	var job = $(this).data('id');
+	var table = '#table-jobs-tasks';
+	$(table).bootstrapTable('removeAll');
+	$(table).bootstrapTable('showLoading');
+	$(modal).modal('show');
+	$.ajax({
+	    async: false,
+	    url: "{{ url_for('api_jobs') }}?id=" + job,
+	    type: 'GET',
+	    success: function(e) {
+		var data = e['data'][0];
+		$(modal).find('#start_time').val(data['start_time']);
+		$(modal).find('#fun').val(data['fun']);
+		$(modal).find('#arg').val(data['args']);
+		$(table).bootstrapTable('hideLoading');
+		var tasks = data['tasks'];
+		for(i in tasks) {
+		    $(table).bootstrapTable('append', {
+			'id': tasks[i]['id'],
+			'minion': tasks[i]['minion']['name'],
+			'master': tasks[i]['minion']['master']['name']
+		    });
+		}
+	    }
+	});
+    });
+    $('#job-new').click(function(e) {
+	e.preventDefault();
+	var modal = '#ModalJobRun';
+	$(modal).modal('show');
+    });
+    $('#job-run').unbind("click");
+    $('#job-run').click(function(e) {
+	e.preventDefault();
+	var url = "{{ url_for('api_jobs') }}";
+	var modal = '#ModalJobRun';
+	var table =  '#table-jobs-minions';
+	var minions = [];
+	var selection = $(table).bootstrapTable('getAllSelections');
+	$(selection).each(function(row){
+	    minions.push(selection[row]['id']);
+	});
+	var data = {
+	    'fun': $(modal).find('#fun').val(),
+	    'args': $(modal).find('#args').val().split(','),
+	    'minions': minions,
+	};
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: 'POST',
+	    data: JSON.stringify(data),
+	    contentType: "application/json",
+	    success: function(e) {
+		$(table).bootstrapTable('uncheckAll');
+		$(modal).modal('hide');		
+	    }
+	});
+    });
+}
+function autosize_tables() {
+    var tables = $('body').find(".table-autosize");
+    tables.each(function(row){
+	var selector = $(tables[row]).attr('id');
+	selector = '#' + selector;
+	$(selector).on('post-body.bs.table', function () {
+	    jqlisteners();
+	});
+	$(selector).bootstrapTable({
+	    height: table_height(selector),
+	});
+	$(selector).bootstrapTable('resetView', {
+	    height: table_height(selector),
+	});	    
+    });
+}
+function table_height(table) {
+    var parent = $(table).parent().parent().parent().parent();
+    return parent.height();
+};
+function detailFormatter(index, row) {
+    console.log(index, row);
+    var html = '';
+    $.ajax({
+	async: false,
+	url: "{{ url_for('api_tasks') }}?id=" + row['id'],
+	type: 'GET',
+	success: function(e) {
+	    var data = e['data'][0];
+	    var result = data['return']['result'][row['minion']];
+	    html+="<pre>";
+	    html+="~ $ salt '" + row['minion'] + "' " + data['fun'] + " ";
+	    html+=data['args'].join(' ') + "\n"
+	    html+=row['minion'] + "\n";
+	    if( typeof (result['out']) === 'undefined' ) {
+		html+="    ----------\n";
+		for(cmd in result['return']) {
+		    html+="    " + cmd + ":\n";
+		    html+="        " + result['return'][cmd] + "\n"
+		};
+	    } else {
+		html+="    " + result['return'][data['args'][0]] + "\n";
+	    };
+	    html+="~ $"
+	    html+="</pre>";
+	}
+    });
+    return html;
+}
+</script>
+{% endblock %}

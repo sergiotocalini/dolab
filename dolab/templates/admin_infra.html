@@ -1,0 +1,536 @@
+{% extends "admin.html" %}
+
+{% block title %}DOLab - Admin: Infrastructure{% endblock %}
+
+{% block content %}
+<ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+  <li class="active">
+    <a data-toggle="tab" href="#masters">
+      <i class="fa fa-cube fa-fw"></i>
+      Masters
+    </a>
+  </li>
+  <li>
+    <a data-toggle="tab" href="#functions">
+      <i class="fa fa-cogs fa-fw"></i>
+      Functions
+    </a>
+  </li>  
+</ul>
+<div class="tab-content">
+  <div id="masters" class="tab-pane fade in active">
+    <div id="toolbar-masters">
+      <button class="btn btn-default" type="button" data-toggle="modal"
+	      data-target="#ModalMaster" aria-haspopup="true"
+	      aria-expanded="false">
+	<i class="fa fa-plus fa-fw"></i>
+      </button>
+    </div>
+    <table id="table-masters" data-show-toggle="false"
+	   data-show-export="false" data-row-style="rowStyle"
+	   data-show-columns="true" data-show-multi-sort="true"
+	   data-sort-name="name" data-pagination="true"
+	   data-toggle="table" data-search="true"
+	   data-toolbar="#toolbar-masters"
+	   data-show-footer="false" data-page-size="50" data-escape="false"
+	   class="table table-hover table-striped table-compact 
+		  table-condensed table-autosize">
+      <thead>
+	<tr>
+	  <th data-align="center" data-valign="middle" data-field="status"
+	      data-sortable="true" data-visible="false" data-checkbox="true">
+	    <i class="fa fa-fw fa-question"></i>
+	    Status
+	  </th>    
+	  <th data-align="center" data-valign="middle" data-field="name"
+	      data-sortable="true">
+	    <i class="fa fa-fw fa-sort-amount-desc"></i>	    
+	    Name
+	  </th>
+	  <th data-align="center" data-valign="middle" data-sortable="true"
+	      data-field="type">
+	    <i class="fa fa-fw fa-info"></i>
+	    Type
+	  </th>
+	  <th data-align="center" data-valign="middle" data-field="host">
+	    <i class="fa fa-fw fa-cloud"></i>
+	    Host
+	  </th>
+	  <th data-align="center" data-valign="middle" data-field="minions">
+	    <i class="fa fa-fw fa-cubes"></i>
+	    Minions
+	  </th>
+	  <th data-align="center" data-valign="middle" data-field="lastseen">
+	    <i class="fa fa-fw fa-calendar"></i>
+	    Last seen
+	  </th>
+	  <th data-align="center" data-valign="middle">
+	    <i class="fa fa-fw fa-cogs"></i>
+	    Actions
+	  </th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for master in data('Master') %}
+	<tr>
+	  <td>{{ master.status }}</td>
+	  <td>{{ master.name }}</td>
+	  <td>{{ master.type }}</td>
+	  <td>{{ master.api_host }}</td>
+	  <td>{{ master.minions.count() }}</td>
+	  <td>{{ ago(master.last_seen) }}</td>
+	  <td>
+	    <a class="master-open" data-id="{{ master.id }}"
+	       data-name="{{ master.name }}"
+	       style="outline: none; text-decoration: none">
+	      <i class="fa fa-fw fa-pencil"></i>
+	    </a>
+	    <a class="master-minions" data-id="{{ master.id }}"
+	       data-name="{{ master.name }}"
+	       style="outline: none; text-decoration: none">
+	      <i class="fa fa-fw fa-search-plus"></i>
+	    </a>
+	    <a class="master-keys" data-id="{{ master.id }}"
+	       data-name="{{ master.name }}"
+	       style="outline: none; text-decoration: none">
+	      <i class="fa fa-fw fa-key"></i>
+	    </a>
+	  </td>
+	</tr>
+	{% endfor %}      
+      </tbody>
+    </table>
+  </div>
+  <div id="functions" class="tab-pane fade in">
+    <div id="toolbar-functions">
+      <button class="btn btn-default" type="button" data-toggle="modal"
+	      data-target="#ModalFunction" aria-haspopup="true"
+	      aria-expanded="false">
+	<i class="fa fa-plus fa-fw"></i>
+      </button>
+    </div>
+    <table id="table-functions" data-show-toggle="false"
+	   data-show-export="false" data-row-style="rowStyle"
+	   data-show-columns="true" data-show-multi-sort="true"
+	   data-sort-name="name" data-pagination="true"
+	   data-toggle="table" data-search="true"
+	   data-toolbar="#toolbar-functions"
+	   data-show-footer="false" data-page-size="50" data-escape="false"
+	   class="table table-hover table-striped table-compact 
+		  table-condensed table-autosize">
+      <thead>
+	<tr>
+	  <th data-align="center" data-valign="middle" data-field="fid"
+	      data-sortable="true" data-visible="false">
+	    <i class="fa fa-fw fa-question"></i>
+	    ID
+	  </th>    
+	  <th data-align="center" data-valign="middle" data-sortable="true"
+	      data-field="type">
+	    <i class="fa fa-fw fa-flask"></i>
+	    Type
+	  </th>
+	  <th data-align="center" data-valign="middle" data-field="fun"
+	      data-sortable="true">
+	    <i class="fa fa-fw fa-cog"></i>
+	    Function
+	  </th>
+	  <th data-align="center" data-valign="middle">
+	    <i class="fa fa-fw fa-cogs"></i>
+	    Actions
+	  </th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for fun in data('Function') %}
+	<tr>
+	  <td>{{ fun.id }}</td>
+	  <td>{{ fun.type }}</td>
+	  <td>{{ fun.fun }}</td>
+	  <td>
+	    <a class="function-open" data-id="{{ fun.id }}"
+	       style="outline: none; text-decoration: none">
+	      <i class="fa fa-fw fa-pencil"></i>
+	    </a>
+	  </td>
+	</tr>
+	{% endfor %}      
+      </tbody>
+    </table>
+  </div>  
+</div>
+<div id="ModalMaster" class="modal fade" tabindex="-1"
+     role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-vcenter">
+    <div class="modal-dialog">
+      <div class="modal-content">
+	<div class="modal-header"
+	     style="background-color: #337ab7; color: #fff;">
+	  <button type="button" class="close"
+		  data-dismiss="modal" aria-hidden="true">
+	    &times;
+	  </button>
+	  <h4 class="modal-title">New</h4>
+	</div>
+	<div class="modal-body">
+	  <form role="form" method="POST">
+	    <fieldset id="fieldset">
+	      <input class="col-md-8 form-control-static hidden" id="mid">
+	      <div class="row">
+		<div class="col-md-6 form-group">
+		  <label for="name">Name</label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="name" name="name" placeholder="Name">
+		  </div>
+		</div>
+		<div class="col-md-6 form-group">
+		  <label for="backend">Type</label>
+		  <div class="input-group">
+		    <select class="selectpicker show-tick"
+			    id="type" name="type">
+		      <option value="SaltStack" data-icon="fa fa-fw fa-flask"
+			      data-tokens="SaltStack">SaltStack</option>
+		      <option value="Puppet" data-icon="fa fa-fw fa-flask"
+			      data-tokens="Puppet">Puppet</option>
+		      <option value="Chef" data-icon="fa fa-fw fa-flask"
+			      data-tokens="Chef">Chef</option>
+		    </select>
+		  </div>
+		</div>
+	      </div>
+	      <div class="row">
+		<div class="col-md-6 form-group">
+		  <label for="host">Host</label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="host" name="host"
+			   placeholder="http://fqdn:8000/">
+		  </div>
+		</div>
+		<div class="col-md-6 form-group">
+		  <label for="host">Timeout</label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="timeout" name="timeout"
+			   placeholder="120">
+		  </div>
+		</div>
+	      </div>
+	      <div class="row">
+    		<div class="col-md-6 form-group">
+		  <label for="account">Username</label>
+		  <div class="input-group">
+		    <input type="text" class="form-control"
+			   id="username" name="username"> 
+		  </div>
+		</div>
+		<div class="col-md-6 form-group">
+		  <label for="password">Password</label>
+		  <div class="input-group">
+		    <input type="password" class="form-control"
+			   id="password" name="password">
+		  </div>
+		</div>
+	      </div>
+	    </fieldset>
+	  </form>
+	</div>
+	<div class="modal-footer">
+	  <div class="pull-left">
+	    <a class="master-delete"
+	       style="outline: none;text-decoration: none;cursor: pointer;">
+	      <i class="fa fa-fw fa-2x fa-trash" aria-hidden="true"></i>
+	    </a>
+	    <a class="master-lock"
+	       style="outline: none;text-decoration: none;cursor: pointer;">
+	      <i class="fa fa-fw fa-2x" aria-hidden="true"></i>
+	    </a>
+	  </div>
+	  <div class="pull-right">
+	    <button type="button" class="btn btn-default"
+		    data-dismiss="modal">
+	      Close
+	    </button>
+	    <button type="button" class="btn btn-primary master-edit">
+	      Save
+	    </button>
+	  </div>
+	</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="ModalSearchMinions" class="modal fade" tabindex="-1"
+     role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-vcenter">
+    <div class="modal-dialog">
+      <div class="modal-content" style="padding-bottom: 1%">
+	<div class="modal-header"
+	     style="background-color: #337ab7; color: #fff;">
+	  <button type="button" class="close"
+		  data-dismiss="modal" aria-hidden="true">
+	    &times;
+	  </button>
+	  <h4 class="modal-title">Minions</h4>
+	</div>
+	<div class="modal-body" style="height: 500px;">
+	  <table id="table-minions-search"
+		 data-show-toggle="false" data-show-export="false"
+		 data-show-columns="true" data-show-multi-sort="true"
+		 data-sort-name="name" data-pagination="true"
+		 data-toggle="table" data-search="true"
+		 data-show-footer="false" data-page-size="50"
+		 data-escape="false"
+		 class="table-hover table-striped table-compact 
+			table-condensed table-autosize">
+	    <thead>
+	      <tr>
+		<th data-field="name" data-sorteable="true">
+		  <i class="fa fa-fw fa-sort-amount-desc"></i>
+		  Name
+		</th>
+		<th data-field="actions" data-align="center">
+		  <i class="fa fa-fw fa-cogs"></i>
+		  Actions
+		</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    </tbody>
+	  </table>
+	</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link href="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.css" rel="stylesheet">
+<script src="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.js"></script>
+<link href="//cdn.corpam.com.ar/bootstrap-select/stable/css/bootstrap-select.min.css" rel="stylesheet">
+<script src="//cdn.corpam.com.ar/bootstrap-select/stable/js/bootstrap-select.min.js"></script>
+<script>
+    $(document).ready(function () {
+	autosize_tables();
+	$(window).resize(function () {
+	    autosize_tables();
+	});
+	$('.modal').on('hidden.bs.modal', function(){
+	    $('.modal').find('.modal-title').html('New');
+	    var forms = $(this).find('form');
+	    forms.each(function(row){
+		forms[row].reset();
+	    });
+	    var selectpickers = $(this).find('.selectpicker');
+	    selectpickers.each(function(row){
+		$(selectpickers[row]).selectpicker('refresh');
+	    });
+	});
+	jqlisteners();
+    });
+function rowStyle(row, index) {
+    if ( row['status'] == 'False' ) {
+    	return {
+    	    css: {"text-decoration": "line-through"}
+    	};
+    } else {
+	return {
+	    css: {"text-decoration": "none"}
+	};
+    }
+}
+function jqlisteners() {
+    $(".master-minions").unbind("click");
+    $(".master-minions").click(function(e) {
+	e.preventDefault();
+	var table = '#table-minions-search';
+	var master = $(this).data('id');
+	var url = "{{ url_for('api_keys') }}?id=" + master;
+	$('#ModalSearchMinions').find('.modal-title').html('Minions');
+	$('#ModalSearchMinions').modal('show');
+	$(table).bootstrapTable('showLoading');
+	$(table).bootstrapTable('removeAll');
+	$.ajax({
+	    async: false,
+	    url: url,
+	    type: 'GET',
+	    success: function(e) {
+		for(minion in e['data']) {
+		    if (e['data'][minion]['register'] == false) {
+			var action_add = `
+			    <a class="minion-add" data-master="`+master+`"
+                               data-minion="`+e['data'][minion]['name']+`"
+			       data-key="`+e['data'][minion]['status']+`">
+			       <i class="fa fa-fw fa-plus"></i>
+			    </a>`;
+			$(table).bootstrapTable('append', {
+			    'name':e['data'][minion]['name'],
+			    'actions': action_add,
+			});
+		    }
+		}
+	    }
+	});
+	$(table).bootstrapTable('hideLoading');
+    });
+    $(".master-open").click(function(e){
+	e.preventDefault();
+	var modal = '#ModalMaster';		    
+	var mid = $(this).data('id');
+	var url = "{{ url_for('api_masters') }}?id=" + mid;
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: 'GET',
+	    success: function(e) {
+		var data = e['data'][0];
+		var tag = $(modal).find('.master-lock').find('i');
+		if ( data['status'] == true ) {
+		    tag.addClass('fa-unlock');
+		} else {
+		    tag.addClass('fa-lock');
+		};
+		$(modal).find('.modal-title').html(data['name']);
+		$(modal).find('#mid').val(data['id']);
+		$(modal).find('#name').val(data['name']);
+		$(modal).find('#type').selectpicker('val', data['type']);
+		$(modal).find('#host').val(data['api_host']);
+		$(modal).find('#username').val(data['api_user']);
+		$(modal).find('#password').val(data['api_pass']);
+		$(modal).modal('show');
+	    }
+	}); 	
+    });
+    $(".master-edit").click(function(e){
+	e.preventDefault();
+	var modal = '#ModalMaster';
+	var mid = $(modal).find('#name').val();
+	var url = "{{ url_for('api_masters') }}?name=" + mid;
+	var data = {'name': $(modal).find('#name').val(),
+		    'type': $(modal).find('#type').val(),
+		    'api_host': $(modal).find('#host').val(),
+		    'api_user': $(modal).find('#username').val(),
+		    'api_pass': $(modal).find('#password').val()};
+	console.log(url, data);
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: 'POST',
+	    data: JSON.stringify(data),
+	    contentType: "application/json",
+	    success: function(e) {
+		$(modal).modal('hide');
+	    }
+	});
+    });
+    $(".master-lock").click(function(e) {
+	e.preventDefault();
+	var modal = '#ModalMaster';
+	var mid = $(modal).find('#mid').val();
+	var url = "{{ url_for('api_masters') }}?id=" + mid;
+	var tag = $(modal).find('.master-lock').find('i');
+	if ( tag.hasClass('fa-unlock') ) {
+	    var active = false;
+	    tag.removeClass('fa-unlock');
+	    tag.addClass('fa-spinner fa-pulse')
+	} else if (tag.hasClass('fa-lock') ) {
+	    var active = true;
+	    tag.removeClass('fa-lock');
+	    tag.addClass('fa-spinner fa-pulse');
+	} else {
+	    return;
+	};
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: 'POST',
+	    data: JSON.stringify({'status': active}),
+	    contentType: "application/json",
+	    success: function(e) {
+		tag.removeClass('fa-spinner fa-pulse');
+		if ( active == true ) {
+		    tag.addClass('fa-unlock');
+		} else {
+		    tag.addClass('fa-lock');
+		}
+	    },
+	    error: function(e) {
+		tag.removeClass('fa-spinner fa-pulse');
+		tag.addClass('fa-exclamation');
+	    }
+	}); 	
+    });
+    $(".master-delete").click(function(e) {
+	e.preventDefault();
+	var modal = '#ModalMaster';
+	var mid = $(modal).find('#mid').val();
+	var url = "{{ url_for('api_masters') }}?id=" + mid;
+	var tag = $(modal).find('.master-delete').find('i');
+	tag.removeClass('fa-trash');
+	tag.addClass('fa-spinner fa-pulse')	
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: 'DELETE',
+	    success: function(e) {
+		var deleteable = {'field': 'mid', 'values': [mid] };
+		$('#table-masters').bootstrapTable('remove', deleteable);
+		$(modal).modal('hide');
+	    },
+	    error: function(e) {
+		tag.removeClass('fa-spinner fa-pulse');
+		tag.addClass('fa-exclamation');
+	    }
+	}); 	
+    });
+    $(".minion-add").click(function(e) {
+	e.preventDefault();
+	var minion = $(this).data('minion');
+	var master = $(this).data('master');
+	var key = $(this).data('key');
+	var url = "{{ url_for('api_minions') }}?name=" + minion;
+	var tag = $(this).find('.minion-delete').find('i');
+	tag.removeClass('fa-plus');
+	tag.addClass('fa-spinner fa-pulse')	
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: 'POST',
+	    data: JSON.stringify({'name': minion, 'key': key,
+				  'status': true, 'master': master}),
+	    contentType: "application/json",
+	    success: function(e) {
+		var listdel = {'field': 'name', 'values': [minion] };
+		$('#table-minions-search').bootstrapTable('remove', listdel);
+	    },
+	    error: function(e) {
+		tag.removeClass('fa-spinner fa-pulse');
+		tag.addClass('fa-exclamation');
+	    }
+	});
+    });
+}
+function autosize_tables() {
+    var tables = $('body').find(".table-autosize");
+    tables.each(function(row){
+	var selector = $(tables[row]).attr('id');
+	selector = '#' + selector;
+	$(selector).on('post-body.bs.table', function () {
+	    jqlisteners();
+	});
+	$(selector).bootstrapTable({
+	    height: table_height(selector),
+	});
+	$(selector).bootstrapTable('resetView', {
+	    height: table_height(selector),
+	});	    
+    });
+}
+function table_height(table) {
+    var parent = $(table).parent().parent().parent().parent();
+    return parent.height();
+};
+</script>
+{% endblock %}

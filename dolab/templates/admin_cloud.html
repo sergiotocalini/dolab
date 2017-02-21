@@ -1,0 +1,696 @@
+{% extends "admin.html" %}
+
+{% block title %}DOLab - Admin: Cloud Computing{% endblock %}
+
+{% block content %}
+<ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+  <li class="active">
+    <a data-toggle="tab" href="#providers">
+      <i class="fa fa-fw fa-industry"></i>
+      Providers
+    </a>
+  </li>
+  <li>
+    <a data-toggle="tab" href="#payments">
+      <i class="fa fa-fw fa-money"></i>
+      Payments
+    </a>
+  </li>    
+</ul>
+<div class="tab-content">
+  <div id="providers" class="tab-pane fade in active">
+    <div id="toolbar-providers">
+      <button class="btn btn-default" type="button" data-toggle="modal"
+	      data-target="#ModalProvider" aria-haspopup="true"
+	      aria-expanded="false">
+	<i class="fa fa-fw fa-plus"></i>
+      </button>
+    </div>
+    <table id="table-providers" data-show-toggle="false"
+	   data-show-export="false" data-row-style="rowStyle"
+	   data-show-columns="true" data-show-multi-sort="true"
+	   data-sort-name="name" data-pagination="true"
+	   data-toggle="table" data-search="true"
+	   data-toolbar="#toolbar-providers"
+	   data-show-footer="false" data-page-size="50" data-escape="false"
+	   class="table table-hover table-striped table-compact 
+		  table-condensed table-autosize">
+      <thead>
+	<tr>
+	  <th data-align="center" data-valign="middle" data-field="status"
+	      data-sortable="true" data-visible="false" data-checkbox="true">
+	    <i class="fa fa-fw fa-question"></i>
+	    Status
+	  </th>    
+	  <th data-halign="center" data-valign="middle" data-field="name"
+	      data-align="center" data-sortable="true">
+	    <i class="fa fa-fw fa-sort-amount-desc"></i>	    
+	    Name
+	  </th>
+	  <th data-align="center" data-valign="middle" data-sortable="true"
+	      data-field="type">
+	    <i class="fa fa-fw fa-cloud"></i>
+	    Type
+	  </th>
+	  <th data-halign="center" data-valign="middle" data-field="owner"
+	      data-align="left">
+	    <i class="fa fa-fw fa-user"></i>
+	    Owner
+	  </th>
+	  <th data-align="center" data-valign="middle" data-field="payment">
+	    <i class="fa fa-fw fa-money"></i>
+	    Payments
+	  </th>
+	  <th data-align="center" data-valign="middle">
+	    <i class="fa fa-fw fa-cogs" aria-hidden="true"></i>
+	    Actions
+	  </th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for provider in data('Provider') %}
+	<tr>
+	  <td>{{ provider.status }}</td>
+	  <td>{{ provider.name }}</td>
+	  <td>
+	    {% if provider.type == 'Amazon EC2' %}
+	    <i class="fa fa-fw fa-amazon" aria-hidden="true"></i>
+	    {% elif provider.type == 'Microsoft Azure' %}
+	    <i class="fa fa-fw fa-windows" aria-hidden="true"></i>
+	    {% endif %}
+	    {{ provider.type }}
+	  </td>
+	  <td>
+	    {% if provider.owner %}
+	    <img class="img-circle fa fa-fw"
+		 src="{{ provider.owner.avatar }}"/>
+	    {{ provider.owner.displayname }}
+	    {% else %}
+	    -
+	    {% endif %}
+	  </td>
+	  <td>
+	    <i class="fa fa-fw fa-usd" aria-hidden="true"></i>
+	    {{ provider.last_payment() }}
+	    ( <strong>{{ provider.payments.count() }}</strong> )
+	  </td>
+	  <td>
+	    <a class="provider-open" data-id="{{ provider.id }}"
+	       data-name="{{ provider.name }}"
+	       style="outline: none; text-decoration: none">
+	      <i class="fa fa-fw fa-pencil" aria-hidden="true"></i>
+	    </a>
+	    <a class="provider-instances" data-id="{{ provider.id }}"
+	       data-name="{{ provider.name }}"
+	       style="outline: none; text-decoration: none">
+	      <i class="fa fa-fw fa-search-plus" aria-hidden="true"></i>
+	    </a>
+	  </td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div id="payments" class="tab-pane fade in">
+    <div id="toolbar-payments">
+      <button class="btn btn-default" type="button" data-toggle="modal"
+	      data-target="#ModalPayment" aria-haspopup="true"
+	      aria-expanded="false">
+	<i class="fa fa-fw fa-plus"></i>
+      </button>
+    </div>
+    <table id="table-payments" data-show-toggle="false"
+	   data-show-export="false" data-row-style="rowStyle"
+	   data-show-columns="true" data-show-multi-sort="true"
+	   data-sort-name="date" data-pagination="true"
+	   data-toggle="table" data-search="true"
+	   data-toolbar="#toolbar-payments" data-sort-order="desc"
+	   data-show-footer="false" data-page-size="50" data-escape="false"
+	   class="table table-hover table-striped table-compact 
+		  table-condensed table-autosize">
+      <thead>
+	<tr>
+	  <th data-halign="center" data-valign="middle" data-field="date"
+	      data-align="center" data-sortable="true">
+	    <i class="fa fa-fw fa-calendar"></i>	    
+	    Date
+	  </th>
+	  <th data-halign="center" data-valign="middle"
+	      data-align="left" data-field="provider">
+	    <i class="fa fa-fw fa-user"></i>
+	    Provider
+	  </th>
+	  <th data-align="center" data-valign="middle" data-sortable="true"
+	      data-field="invoice">
+	    <i class="fa fa-fw fa-inbox"></i>
+	    Invoice
+	  </th>
+	  <th data-halign="center" data-valign="middle"
+	      data-align="right" data-field="amount">
+	    <i class="fa fa-fw fa-money"></i>
+	    Amount
+	  </th>
+	  <th data-align="center" data-valign="middle">
+	    <i class="fa fa-fw fa-cogs" aria-hidden="true"></i>
+	    Actions
+	  </th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for payment in data('Payment') %}
+	<tr>
+	  <td>{{ payment.datetime }}</td>
+	  <td>
+	    {% if payment.provider.owner %}
+	    <i class="fa fa-fw fa-user" aria-hidden="true"
+	       title="Owned by: {{ payment.provider.owner.displayname }}">
+	    </i>
+	    {% endif %}
+	    {% if payment.provider.type == 'Amazon EC2' %}
+	    <i class="fa fa-fw fa-amazon" aria-hidden="true"></i>
+	    {% elif payment.provider.type == 'Microsoft Azure' %}
+	    <i class="fa fa-fw fa-windows" aria-hidden="true"></i>
+	    {% endif %}
+	    {{ payment.provider.name }}
+	  </td>
+	  <td>{{ payment.invoice }}</td>
+	  <td>
+	    {{ payment.amount }}
+	    {% if payment.method == 'creditcard' %}
+	    <i class="fa fa-fw fa-credit-card" aria-hidden="true"
+	       title="Ending in {{ payment.instrument}}"></i>
+	    {% endif %}
+	  </td>
+	  <td>
+	    <a class="payment-open" data-id="{{ payment.id }}"
+	       style="outline: none; text-decoration: none">
+	      <i class="fa fa-fw fa-pencil" aria-hidden="true"></i>
+	    </a>
+	  </td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>  
+</div>
+<div id="ModalProvider" class="modal fade" tabindex="-1"
+     role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-vcenter">
+    <div class="modal-dialog">
+      <div class="modal-content">
+	<div class="modal-header"
+	     style="background-color: #337ab7; color: #fff;">
+	  <button type="button" class="close"
+		  data-dismiss="modal" aria-hidden="true">
+	    &times;
+	  </button>
+	  <h4 class="modal-title">New</h4>
+	</div>
+	<div class="modal-body" style="height: 400px;">
+	  <form role="form" method="POST"
+		style="position: relative;top: 50%;
+		       transform: translateY(-50%);
+		       padding: 5% 0%;">
+	    <fieldset id="fieldset">
+	      <input class="col-md-8 form-control-static hidden"
+		     id="pid">
+	      <div class="row" style="margin:0px">
+		<div class="col-md-1"></div>
+		<div class="col-md-5 form-group">
+		  <label class="control-label" for="name">Name</label>
+		  <input type="text" class="form-control"
+			 id="name" name="name" placeholder="Name">
+		</div>
+		<div class="col-md-5 form-group">
+		  <label class="control-label" for="owner">Owner</label>
+		  <select class="selectpicker show-tick form-control"
+			  id="owner" name="owner"
+			  data-live-search="true" title="...">
+		    {% for user in data('User') %}
+		    <option value="{{ user.id }}"
+			    data-content="<img class='img-circle
+					  fa fa-fw'
+					  src='{{ user.avatar }}'/>
+					  {{ user.displayname }}"
+			    data-tokens="{{ user.displayname }}">
+		      {{ user.displayname }}
+		    </option>
+		    {% endfor %}
+		  </select>
+		</div>
+	      </div>
+	      <div class="row" style="margin:0px">
+		<div class="col-md-1"></div>
+		<div class="col-md-5 form-group">
+		  <label class="control-label" for="type">Type</label>
+		  <select class="selectpicker show-tick form-control"
+			  id="type" name="type">
+		    <option value="Amazon EC2"
+			    data-icon="fa fa-fw fa-amazon"
+			    data-tokens="Amazon EC2">
+		      Amazon EC2
+		    </option>
+    		    <option value="Google Cloud Platform"
+			    data-icon="fa fa-fw fa-google"
+			    data-tokens="Google Cloud Platform">
+		      Google Cloud Platform
+		    </option>
+		    <option value="Microsoft Azure"
+			    data-icon="fa fa-fw fa-windows"
+			    data-tokens="Microsoft Azure">
+		      Microsoft Azure
+		    </option>
+		  </select>
+		</div>
+		<div class="col-md-5 form-group">
+		  <label class="control-label" for="api">Api</label>
+		  <input type="text" class="form-control"
+			 id="api" name="api"
+			 placeholder="http://localhost/" disabled>
+		</div>		
+	      </div>
+	      <div class="row" style="margin:0px">
+		<div class="col-md-1"></div>
+    		<div class="col-md-10 form-group">
+		  <label class="control-label" for="access">
+		    Access Key
+		  </label>
+		  <input type="text" class="form-control"
+			 id="access" name="access"> 
+		</div>
+	      </div>
+	      <div class="row" style="margin:0px">
+		<div class="col-md-1"></div>
+		<div class="col-md-10 form-group">
+		  <label class="control-label" for="secret">
+		    Secret Key
+		  </label>
+		  <input type="text" class="form-control"
+			 id="secret" name="secret">
+		</div>
+	      </div>
+	    </fieldset>
+	  </form>
+	</div>
+	<div class="modal-footer">
+	  <div class="pull-left">
+	    <a class="provider-delete"
+	       style="outline: none;text-decoration: none;cursor: pointer;">
+	      <i class="fa fa-fw fa-2x fa-trash" aria-hidden="true"></i>
+	    </a>
+	  </div>
+	  <div class="pull-right">
+	    <button type="button" class="btn btn-default"
+		    data-dismiss="modal">
+	      Close
+	    </button>
+	    <button type="button" class="btn btn-primary provider-edit">
+	      Save
+	    </button>
+	  </div>
+	</div>	
+      </div>
+    </div>
+  </div>
+</div>
+<div id="ModalProviderInstances" class="modal fade" tabindex="-1"
+     role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-vcenter">
+    <div class="modal-dialog">
+      <div class="modal-content" style="padding-bottom: 1%">
+	<div class="modal-header"
+	     style="background-color: #337ab7; color: #fff;">
+	  <button type="button" class="close"
+		  data-dismiss="modal" aria-hidden="true">
+	    &times;
+	  </button>
+	  <h4 class="modal-title">Instances</h4>
+	</div>
+	<div class="modal-body" style="height: 500px;">
+	  <table id="table-provider-instances"
+		 data-show-toggle="false" data-show-export="false"
+		 data-show-columns="true" data-show-multi-sort="true"
+		 data-sort-name="name" data-pagination="true"
+		 data-toggle="table" data-search="true"
+		 data-show-footer="false" data-page-size="50"
+		 data-escape="false"
+		 class="table-hover table-striped table-compact 
+			table-condensed table-autosize">
+	    <thead>
+	      <tr>
+		<th data-field="instance" data-sorteable="true"
+		    data-align="center">
+		  <i class="fa fa-fw fa-key"></i>
+		  Instance
+		</th>
+		<th data-field="name" data-sorteable="true"
+		    data-align="center">
+		  <i class="fa fa-fw fa-sort-amount-desc"></i>
+		  Name
+		</th>
+		<th data-field="actions" data-align="center">
+		  <i class="fa fa-fw fa-cogs"></i>
+		  Actions
+		</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    </tbody>
+	  </table>
+	</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="ModalPayment" class="modal fade" tabindex="-1"
+     role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-vcenter">
+    <div class="modal-dialog">
+      <div class="modal-content">
+	<div class="modal-header"
+	     style="background-color: #337ab7; color: #fff;">
+	  <button type="button" class="close"
+		  data-dismiss="modal" aria-hidden="true">
+	    &times;
+	  </button>
+	  <h4 class="modal-title">New</h4>
+	</div>
+	<div class="modal-body" style="height: 400px;">
+	  <form role="form" method="POST"
+		style="position: relative;top: 50%;
+		       transform: translateY(-50%);
+		       padding: 5% 0%;">
+	    <fieldset id="fieldset">
+	      <input class="col-md-8 form-control-static hidden"
+		     id="payid">
+	      <div class="row" style="margin:0px">
+		<div class="col-md-1"></div>
+		<div class="col-md-5 form-group">
+		  <label class="control-label" for="name">Date</label>
+		  <div class="input-group">
+		    <span class="input-group-addon">
+		      <i class="fa fa-fw fa-calendar"></i>
+		    </span>
+		    <input type="text" class="form-control select-date"
+			   id="date" name="date" placeholder="Today">
+		  </div>
+		</div>
+		<div class="col-md-5 form-group">
+		  <label class="control-label" for="owner">Provider</label>
+		  <select class="selectpicker show-tick form-control"
+			  id="provider" name="provider"
+			  data-live-search="true" title="...">
+		    {% for provider in data('Provider') %}
+		    <option value="{{ provider.id }}"
+			 {% if provider.type == 'Amazon EC2' %}
+			    data-content="<i class='fa fa-fw fa-amazon'></i>
+					  {{ provider.name }}"
+			 {% elif provider.type == 'Microsoft Azure' %}
+			    data-content="<i class='fa fa-fw fa-windows'></i>
+					  {{ provider.name }}"
+			 {% elif provider.type == 'Google Cloud Platform' %}
+			    data-content="<i class='fa fa-fw fa-google'></i>
+					  {{ provider.name }}"
+			 {% endif %}
+			    data-tokens="{{ provider.name }}">
+		      {{ provider.name }}
+		    </option>
+		    {% endfor %}
+		  </select>
+		</div>
+	      </div>
+	      <div class="row" style="margin:0px">
+		<div class="col-md-1"></div>
+		<div class="col-md-5 form-group">
+		  <label class="control-label" for="invoice">Invoice</label>
+		  <div class="input-group">
+		    <span class="input-group-addon">
+		      <i class="fa fa-fw fa-inbox"></i>
+		    </span>
+		    <input type="text" class="form-control"
+			   id="invoice" name="invoice">
+		  </div>
+		</div>
+		<div class="col-md-5 form-group">
+		  <label class="control-label" for="amount">Amount</label>
+		  <div class="input-group">
+		    <span class="input-group-addon">
+		      <i class="fa fa-fw fa-money"></i>
+		    </span>
+		    <input type="text" class="form-control"
+			   id="amount" name="amount">
+		  </div>
+		</div>		
+	      </div>
+	      <div class="row" style="margin:0px">
+		<div class="col-md-1"></div>
+		<div class="col-md-5 form-group">
+		  <label class="control-label" for="method">Method</label>
+		  <select class="selectpicker show-tick form-control"
+			  id="method" name="method">
+		    <option value="creditcard"
+			    data-content="<i class='fa fa-fw fa-credit-card'></i>
+					  Credit Card"
+			    data-tokens="Credit Card">
+			Credit Card
+		    </option>
+		  </select>		    
+		</div>
+		<div class="col-md-5 form-group">
+		  <label class="control-label" for="instrument">
+		    Instrument
+		  </label>
+		  <div class="input-group">
+		    <span class="input-group-addon">
+		      <i class="fa fa-fw fa-info"></i>
+		    </span>
+		    <input type="text" class="form-control"
+			   id="instrument" name="instrument">
+		  </div>
+		</div>		
+	      </div>	      
+	    </fieldset>
+	  </form>
+	</div>
+	<div class="modal-footer">
+	  <div class="pull-left">
+	    <a class="provider-delete"
+	       style="outline: none;text-decoration: none;cursor: pointer;">
+	      <i class="fa fa-fw fa-2x fa-trash" aria-hidden="true"></i>
+	    </a>
+	  </div>
+	  <div class="pull-right">
+	    <button type="button" class="btn btn-default" data-dismiss="modal">
+	      Close
+	    </button>
+	    <button type="button" class="btn btn-primary payment-update">
+	      Save
+	    </button>
+	  </div>
+	</div>	
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link href="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.css" rel="stylesheet">
+<script src="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.js"></script>
+<link href="//cdn.corpam.com.ar/bootstrap-select/stable/css/bootstrap-select.min.css" rel="stylesheet">
+<script src="//cdn.corpam.com.ar/bootstrap-select/stable/js/bootstrap-select.min.js"></script>
+<script src="//cdn.corpam.com.ar/moment/stable/js/moment.min.js"></script>
+<link href="//cdn.corpam.com.ar/bootstrap-datetimepicker/stable/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<script src="//cdn.corpam.com.ar/bootstrap-datetimepicker/stable/js/bootstrap-datetimepicker.min.js"></script>
+<script>
+    $(document).ready(function () {
+	autosize_tables();
+	$(window).resize(function () {
+	    autosize_tables();
+	});
+	$('.modal').on('hidden.bs.modal', function(){
+	    $('.modal').find('.modal-title').html('New');
+	    var forms = $(this).find('form');
+	    forms.each(function(row){
+		forms[row].reset();
+	    });
+	    var selectpickers = $(this).find('.selectpicker');
+	    selectpickers.each(function(row){
+		$(selectpickers[row]).selectpicker('refresh');
+	    });
+	});
+	$(".select-date").datetimepicker({
+	    showTodayButton: true,
+	    showClose: true,
+	    format: 'YYYY/MM/DD',
+	});    
+	jqlisteners();
+    });
+function rowStyle(row, index) {
+    if ( row['status'] == 'False' ) {
+    	return {
+    	    css: {"text-decoration": "line-through"}
+    	};
+    } else {
+	return {
+	    css: {"text-decoration": "none"}
+	};
+    }
+}
+function jqlisteners() {
+    $(".provider-instances").unbind("click");
+    $(".provider-instances").click(function(e) {
+	e.preventDefault();
+	var table = '#table-provider-instances';
+	var provider = $(this).data('id');
+	var url = "{{ url_for('api_instances') }}?id=" + provider;
+	$('#ModalProviderInstances').find('.modal-title').html('Instances');
+	$('#ModalProviderInstances').modal('show');
+	$(table).bootstrapTable('showLoading');
+	$(table).bootstrapTable('removeAll');
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: 'GET',
+	    success: function(e) {
+		for(instance in e['data']) {
+		    var data = e['data'][instance];
+		    if (data['register'] === false) {
+			var action_add = `
+			    <a class="instance-add"
+			       data-provider="`+provider+`"
+			       data-instance="`+data['instance']+`"
+			       data-name="`+data['name']+`"
+			       data-type="`+data['type']+`"
+			       data-state="`+data['state']+`"
+			       data-region="`+data['region']+`"
+			       data-hv="`+data['hypervisor']+`"
+			       data-hvtype="`+data['hypervisor_type']+`"
+			       data-private="`+data['address_private']+`"
+			       data-public="`+data['address_public']+`">
+			      <i class="fa fa-fw fa-plus"></i>
+			    </a>`;
+			$(table).bootstrapTable('append', {
+			    'instance':data['instance'],
+			    'name':data['name'],
+			    'actions': action_add,
+			});
+		    };
+		};
+		$(table).bootstrapTable('hideLoading');
+	    }
+	});
+    });
+    $(".instance-add").click(function(e) {
+	e.preventDefault();
+	var tag = $(this).find('i');
+	if (tag.hasClass('fa-plus') ) {
+	    var data = {
+		'provider': $(this).data('provider'),
+		'instance': $(this).data('instance'),
+		'name': $(this).data('name'),
+		'state': $(this).data('state'),
+		'type': $(this).data('type'),
+		'region': $(this).data('region'),
+		'hypervisor': $(this).data('hv'),
+		'hypervisor_type': $(this).data('hvtype'),
+		'address_private': $(this).data('private'),
+		'address_public': $(this).data('public'),
+	    }
+	    var url = "{{ url_for('api_instances') }}?id=new";
+	    tag.removeClass('fa-plus');
+	    tag.addClass('fa-spinner fa-pulse')	
+	    $.ajax({
+		async: true,
+		url: url,
+		type: 'POST',
+		data: JSON.stringify(data),
+		contentType: "application/json",
+		success: function(e) {
+		    var listdel = {'field': 'instance',
+				   'values': [data['instance']] };
+		    $('#table-provider-instances').bootstrapTable('remove',
+								  listdel);
+		},
+		error: function(e) {
+		    tag.removeClass('fa-spinner fa-pulse');
+		    tag.addClass('fa-exclamation');
+		}
+	    });
+	}
+    });
+    $(".provider-open").click(function(e) {
+	e.preventDefault();
+	var pid = $(this).data('id');
+	var modal = "#ModalProvider";
+	$.ajax({
+	    async: true,
+	    url: "{{ url_for('api_providers') }}?id=" + pid,
+	    type: 'GET',
+	    success: function(e) {
+		var data = e['data'][0];
+		$(modal).find('.modal-title').html(data['name']);
+		$(modal).find('#pid').val(data['id']);
+		$(modal).find('#name').val(data['name']);
+		$(modal).find('#owner').selectpicker('val', data['owner']);
+		$(modal).find('#type').selectpicker('val', data['type']);
+		$(modal).find('#api').val(data['api']);
+		$(modal).find('#access').val(data['access']);
+		$(modal).find('#secret').val(data['secret']);
+		$(modal).modal('show');
+	    }
+	});
+    });
+    $(".payment-update").click(function(e){
+	e.preventDefault();
+	var modal = '#ModalPayment';
+	var payid = $(modal).find('#payid').val();
+	if ( typeof pay !== 'undefined' ) {
+	    var url = "{{ url_for('api_payments') }}?id=" + payid;
+	    var request = 'PUT';
+	} else {
+	    var url = "{{ url_for('api_payments') }}";
+	    var request = 'POST';
+	};
+	var data = {'datetime': $(modal).find('#date').val(),
+		    'provider': $(modal).find('#provider').val(),
+		    'invoice': $(modal).find('#invoice').val(),
+		    'amount': $(modal).find('#amount').val(),
+		    'method': $(modal).find('#method').val(),
+		    'instrument': $(modal).find('#instrument').val()
+		   };
+	console.log(url, data);
+	$.ajax({
+	    async: true,
+	    url: url,
+	    type: request,
+	    data: JSON.stringify(data),
+	    contentType: "application/json",
+	    success: function(e) {
+		$(modal).modal('hide');
+	    }
+	});
+    });
+}
+function autosize_tables() {
+    var tables = $('body').find(".table-autosize");
+    tables.each(function(row){
+	var selector = $(tables[row]).attr('id');
+	selector = '#' + selector;
+	$(selector).on('post-body.bs.table', function () {
+	    jqlisteners();
+	});
+	$(selector).bootstrapTable({
+	    height: table_height(selector),
+	});
+	$(selector).bootstrapTable('resetView', {
+	    height: table_height(selector),
+	});	    
+    });
+}
+function table_height(table) {
+    var parent = $(table).parent().parent().parent().parent();
+    return parent.height();
+};
+</script>
+{% endblock %}
